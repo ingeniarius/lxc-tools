@@ -321,13 +321,18 @@ create() {
     fi
 
     mkdir -p $ROOTFS
-    mount /dev/vg0/lxc-$NAME $ROOTFS
-    RES=$?
 
-    if [ "$RES" != "0" ]; then
-        echo "Failed to mount /dev/vg0/lxc-$NAME"
-        lxc-destroy -n $NAME
-        exit 1
+    echo -n "Specify LVM volume (/dev/vg0), or leave it empty if you are not planning to use it [] "
+    read _LVMVOL_
+
+    if [ ! -z "$_LVMVOL_" ]; then
+      mount $_LVMVOL_/lxc-$NAME $ROOTFS
+      RES=$?
+      if [ "$RES" != "0" ]; then
+          echo "Failed to mount $_LVMVOL_/lxc-$NAME"
+          lxc-destroy -n $NAME
+          exit 1
+      fi
     fi
 
     install_ubuntu
